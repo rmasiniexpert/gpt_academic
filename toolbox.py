@@ -8,16 +8,16 @@ from latex2mathml.converter import convert as tex2mathml
 from functools import wraps, lru_cache
 
 """
-========================================================================
-第一部分
-函数插件输入输出接驳区
-    - ChatBotWithCookies:   带Cookies的Chatbot类，为实现更多强大的功能做基础
-    - ArgsGeneralWrapper:   装饰器函数，用于重组输入参数，改变输入参数的顺序与结构
-    - update_ui:            刷新界面用 yield from update_ui(chatbot, history)
-    - CatchException:       将插件中出的所有问题显示在界面上
-    - HotReload:            实现插件的热更新
-    - trimmed_format_exc:   打印traceback，为了安全而隐藏绝对地址
-========================================================================
+==================================================== ========================
+first part
+Function plug-in input and output connection area
+     - ChatBotWithCookies: Chatbot class with Cookies, laying the foundation for more powerful functions
+     - ArgsGeneralWrapper: Decorator function, used to reorganize input parameters, change the order and structure of input parameters
+     - update_ui: refresh the interface with yield from update_ui(chatbot, history)
+     - CatchException: Display all problems in the plugin on the interface
+     - HotReload: Realize hot update of plugins
+     - trimmed_format_exc: Print traceback, hide absolute address for security
+==================================================== ========================
 """
 
 class ChatBotWithCookies(list):
