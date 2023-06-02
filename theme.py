@@ -97,10 +97,9 @@ def adjust_theme():
                 return res
             gr.routes.templates.TemplateResponse = gradio_new_template_fn   # override gradio template
     except:
-        set_theme = None
-        print('gradio版本较旧, 不能自定义字体和颜色')
+         set_theme = None
+         print('gradio version is old, font and color cannot be customized')
     return set_theme
-
 
 advanced_css = """
 .markdown-body table {
