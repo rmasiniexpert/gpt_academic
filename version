@@ -1,5 +1,5 @@
 {
-  "version": 3.37,
-  "show_feature": true,
-  "new_feature": "修复gradio复制按钮BUG <-> 修复PDF翻译的BUG, 新增HTML中英双栏对照 <-> 添加了OpenAI图片生成插件 <-> 添加了OpenAI音频转文本总结插件 <-> 通过Slack添加对Claude的支持 <-> 提供复旦MOSS模型适配（启用需额外依赖） <-> 提供docker-compose方案兼容LLAMA盘古RWKV等模型的后端 <-> 新增Live2D装饰 <-> 完善对话历史的保存/载入/删除 <-> 保存对话功能"
+   "version": 3.37,
+   "show_feature": true,
+   "new_feature": "Fix gradio copy button BUG <-> Fix PDF translation BUG, add HTML Chinese-English double-column comparison <-> Add OpenAI image generation plug-in <-> Add OpenAI audio-to-text summary plug-in <-> Add support for Claude through Slack <-> Provide Fudan MOSS model adaptation (additional dependencies are required for enabling) <-> Provide a docker-compose solution compatible with the backend of LLAMA, Pangu, RWKV and other models <-> Add Live2D decoration<-> Complete Conversation History Save/Load/Delete <-> Save Conversation Function"
 }
