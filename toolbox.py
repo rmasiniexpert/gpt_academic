@@ -36,104 +36,104 @@ class ChatBotWithCookies(list):
 
 
 def ArgsGeneralWrapper(f):
-    """
-    装饰器函数，用于重组输入参数，改变输入参数的顺序与结构。
-    """
-    def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
-        txt_passon = txt
-        if txt == "" and txt2 != "": txt_passon = txt2
-        # 引入一个有cookie的chatbot
-        cookies.update({
-            'top_p':top_p,
-            'temperature':temperature,
-        })
-        llm_kwargs = {
-            'api_key': cookies['api_key'],
-            'llm_model': llm_model,
-            'top_p':top_p,
-            'max_length': max_length,
-            'temperature':temperature,
-        }
-        plugin_kwargs = {
-            "advanced_arg": plugin_advanced_arg,
-        }
-        chatbot_with_cookie = ChatBotWithCookies(cookies)
-        chatbot_with_cookie.write_list(chatbot)
-        yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
-    return decorated
+     """
+     The decorator function is used to reorganize the input parameters and change the order and structure of the input parameters.
+     """
+     def decorated(cookies, max_length, llm_model, txt, txt2, top_p, temperature, chatbot, history, system_prompt, plugin_advanced_arg, *args):
+         txt_passon = txt
+         if txt == "" and txt2 != "": txt_passon = txt2
+         # Introduce a chatbot with cookies
+         cookies. update({
+             'top_p': top_p,
+             'temperature': temperature,
+         })
+         llm_kwargs = {
+             'api_key': cookies['api_key'],
+             'llm_model': llm_model,
+             'top_p': top_p,
+             'max_length': max_length,
+             'temperature': temperature,
+         }
+         plugin_kwargs = {
+             "advanced_arg": plugin_advanced_arg,
+         }
+         chatbot_with_cookie = ChatBotWithCookies(cookies)
+         chatbot_with_cookie.write_list(chatbot)
+         yield from f(txt_passon, llm_kwargs, plugin_kwargs, chatbot_with_cookie, history, system_prompt, *args)
+     return decorated
 
 
-def update_ui(chatbot, history, msg='正常', **kwargs):  # 刷新界面
-    """
-    刷新用户界面
-    """
-    assert isinstance(chatbot, ChatBotWithCookies), "在传递chatbot的过程中不要将其丢弃。必要时，可用clear将其清空，然后用for+append循环重新赋值。"
-    yield chatbot.get_cookies(), chatbot, history, msg
+def update_ui(chatbot, history, msg='normal', **kwargs): # refresh interface
+     """
+     Refresh the UI
+     """
+     assert isinstance(chatbot, ChatBotWithCookies), "Don't discard the chatbot in the process of passing it. If necessary, use clear to clear it, and then use the for+append loop to reassign it."
+     yield chatbot.get_cookies(), chatbot, history, msg
 
 def trimmed_format_exc():
-    import os, traceback
-    str = traceback.format_exc()
-    current_path = os.getcwd()
-    replace_path = "."
-    return str.replace(current_path, replace_path)
+     import os, traceback
+     str = traceback. format_exc()
+     current_path = os. getcwd()
+     replace_path = "."
+     return str. replace(current_path, replace_path)
 
 def CatchException(f):
-    """
-    装饰器函数，捕捉函数f中的异常并封装到一个生成器中返回，并显示到聊天当中。
-    """
+     """
+     Decorator function, captures the exception in function f and encapsulates it into a generator to return and display it in the chat.
+     """
 
-    @wraps(f)
-    def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
-        try:
-            yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
-        except Exception as e:
-            from check_proxy import check_proxy
-            from toolbox import get_conf
-            proxies, = get_conf('proxies')
-            tb_str = '```\n' + trimmed_format_exc() + '```'
-            if len(chatbot) == 0:
-                chatbot.clear()
-                chatbot.append(["插件调度异常", "异常原因"])
-            chatbot[-1] = (chatbot[-1][0],
-                           f"[Local Message] 实验性函数调用出错: \n\n{tb_str} \n\n当前代理可用性: \n\n{check_proxy(proxies)}")
-            yield from update_ui(chatbot=chatbot, history=history, msg=f'异常 {e}') # 刷新界面
-    return decorated
+     @wraps(f)
+     def decorated(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT=-1):
+         try:
+             yield from f(txt, top_p, temperature, chatbot, history, systemPromptTxt, WEB_PORT)
+         except Exception as e:
+             from check_proxy import check_proxy
+             from toolbox import get_conf
+             proxies, = get_conf('proxies')
+             tb_str = '```\n' + trimmed_format_exc() + '```'
+             if len(chatbot) == 0:
+                 chatbot. clear()
+                 chatbot.append(["plug-in scheduling exception", "abnormal reason"])
+             chatbot[-1] = (chatbot[-1][0],
+                            f"[Local Message] Error in experimental function call: \n\n{tb_str} \n\nCurrent proxy availability: \n\n{check_proxy(proxies)}")
+             yield from update_ui(chatbot=chatbot, history=history, msg=f'abnormal {e}') # Refresh interface
+     return decorated
 
 
 def HotReload(f):
-    """
-    HotReload的装饰器函数，用于实现Python函数插件的热更新。
-    函数热更新是指在不停止程序运行的情况下，更新函数代码，从而达到实时更新功能。
-    在装饰器内部，使用wraps(f)来保留函数的元信息，并定义了一个名为decorated的内部函数。
-    内部函数通过使用importlib模块的reload函数和inspect模块的getmodule函数来重新加载并获取函数模块，
-    然后通过getattr函数获取函数名，并在新模块中重新加载函数。
-    最后，使用yield from语句返回重新加载过的函数，并在被装饰的函数上执行。
-    最终，装饰器函数返回内部函数。这个内部函数可以将函数的原始定义更新为最新版本，并执行函数的新版本。
-    """
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        fn_name = f.__name__
-        f_hot_reload = getattr(importlib.reload(inspect.getmodule(f)), fn_name)
-        yield from f_hot_reload(*args, **kwargs)
-    return decorated
+     """
+     Decorator function of HotReload, used to implement hot update of Python function plugins.
+     Function hot update refers to updating the function code without stopping the running of the program, so as to achieve real-time update function.
+     Inside the decorator, wraps(f) is used to preserve the meta-information of the function, and an inner function named decorated is defined.
+     The internal function reloads and obtains the function module by using the reload function of the importlib module and the getmodule function of the inspect module,
+     Then get the function name through the getattr function, and reload the function in the new module.
+     Finally, use the yield from statement to return the reloaded function and execute on the decorated function.
+     Ultimately, the decorator function returns the inner function. This internal function can update the original definition of the function to the latest version and execute the new version of the function.
+     """
+     @wraps(f)
+     def decorated(*args, **kwargs):
+         fn_name = f.__name__
+         f_hot_reload = getattr(importlib. reload(inspect. getmodule(f)), fn_name)
+         yield from f_hot_reload(*args, **kwargs)
+     return decorated
 
 
 """
-========================================================================
-第二部分
-其他小工具:
-    - write_results_to_file:    将结果写入markdown文件中
-    - regular_txt_to_markdown:  将普通文本转换为Markdown格式的文本。
-    - report_execption:         向chatbot中添加简单的意外错误信息
-    - text_divide_paragraph:    将文本按照段落分隔符分割开，生成带有段落标签的HTML代码。
-    - markdown_convertion:      用多种方式组合，将markdown转化为好看的html
-    - format_io:                接管gradio默认的markdown处理方式
-    - on_file_uploaded:         处理文件的上传（自动解压）
-    - on_report_generated:      将生成的报告自动投射到文件上传区
-    - clip_history:             当历史上下文过长时，自动截断
-    - get_conf:                 获取设置
-    - select_api_key:           根据当前的模型类别，抽取可用的api-key
-========================================================================
+==================================================== ========================
+the second part
+Other gadgets:
+     - write_results_to_file: write the results to the markdown file
+     - regular_txt_to_markdown: Convert normal text to Markdown formatted text.
+     - report_execption: add simple unexpected error message to chatbot
+     - text_divide_paragraph: Split the text according to the paragraph separator and generate HTML code with paragraph tags.
+     - markdown_convertion: convert markdown into nice-looking html in a variety of ways
+     - format_io: take over Gradio's default markdown processing method
+     - on_file_uploaded: handle file upload (automatic decompression)
+     - on_report_generated: automatically project the generated report to the file upload area
+     - clip_history: Automatically truncate when the history context is too long
+     - get_conf: get settings
+     - select_api_key: According to the current model category, extract the available api-key
+==================================================== ========================
 """
 
 def get_reduce_token_percent(text):
