@@ -1,83 +1,83 @@
-# [step 1]>> 例如： API_KEY = "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" （此key无效）
-API_KEY = "sk-此处填API密钥"    # 可同时填写多个API-KEY，用英文逗号分割，例如API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey1,fkxxxx-api2dkey2"
+# [step 1]>> For example: API_KEY = "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" (this key is invalid)
+API_KEY = "sk-fill API key here" # Multiple API-KEYs can be filled in at the same time, separated by English commas, for example API_KEY = "sk-openaikey1,sk-openaikey2,fkxxxx-api2dkey1,fkxxxx-api2dkey2"
 
-# [step 2]>> 改为True应用代理，如果直接在海外服务器部署，此处不修改
+# [step 2]>> Change to True application proxy, if it is directly deployed on an overseas server, do not modify it here
 USE_PROXY = False
 if USE_PROXY:
-    # 填写格式是 [协议]://  [地址] :[端口]，填写之前不要忘记把USE_PROXY改成True，如果直接在海外服务器部署，此处不修改
-    # 例如    "socks5h://localhost:11284"
-    # [协议] 常见协议无非socks5h/http; 例如 v2**y 和 ss* 的默认本地协议是socks5h; 而cl**h 的默认本地协议是http
-    # [地址] 懂的都懂，不懂就填localhost或者127.0.0.1肯定错不了（localhost意思是代理软件安装在本机上）
-    # [端口] 在代理软件的设置里找。虽然不同的代理软件界面不一样，但端口号都应该在最显眼的位置上
+     # Fill in the format is [protocol]://[address]:[port], don’t forget to change USE_PROXY to True before filling in, if you deploy directly on overseas servers, don’t modify it here
+     # For example "socks5h://localhost:11284"
+     # [Protocol] Common protocols are socks5h/http; for example, the default local protocol of v2**y and ss* is socks5h; and the default local protocol of cl**h is http
+     # [Address] If you know everything, you can fill in localhost or 127.0.0.1 if you don’t understand. (localhost means that the agent software is installed on this machine)
+     # [Port] Find it in the settings of the proxy software. Although different agent software interfaces are different, the port number should be in the most prominent position
 
-    # 代理网络的地址，打开你的*学*网软件查看代理的协议(socks5/http)、地址(localhost)和端口(11284)
-    proxies = {
-        #          [协议]://  [地址]  :[端口]
-        "http":  "socks5h://localhost:11284",  # 再例如  "http":  "http://127.0.0.1:7890",
-        "https": "socks5h://localhost:11284",  # 再例如  "https": "http://127.0.0.1:7890",
-    }
+     # The address of the proxy network, open your *learning*net software to view the proxy protocol (socks5/http), address (localhost) and port (11284)
+     proxies = {
+         # [protocol]://[address]:[port]
+         "http": "socks5h://localhost:11284", # Another example "http": "http://127.0.0.1:7890",
+         "https": "socks5h://localhost:11284", # Another example "https": "http://127.0.0.1:7890",
+     }
 else:
-    proxies = None
+     proxies = None
 
-# [step 3]>> 多线程函数插件中，默认允许多少路线程同时访问OpenAI。Free trial users的限制是每分钟3次，Pay-as-you-go users的限制是每分钟3500次
-# 一言以蔽之：免费用户填3，OpenAI绑了信用卡的用户可以填 16 或者更高。提高限制请查询：https://platform.openai.com/docs/guides/rate-limits/overview
-DEFAULT_WORKER_NUM = 3
+# [step 3]>> In the multi-thread function plug-in, how many threads are allowed to access OpenAI at the same time by default. The limit for Free trial users is 3 times per minute, and the limit for Pay-as-you-go users is 3500 times per minute
+# In a nutshell: free users fill in 3, OpenAI users with credit cards can fill in 16 or higher. Please check to increase the limit: https://platform.openai.com/docs/guides/rate-limits/overview
+DEFAULT_WORKER_NUM=3
 
 
-# [step 4]>> 以下配置可以优化体验，但大部分场合下并不需要修改
-# 对话窗的高度
+# [step 4]>> The following configuration can optimize the experience, but it does not need to be modified in most cases
+# The height of the dialog window
 CHATBOT_HEIGHT = 1115
 
-# 代码高亮
+# Code highlighting
 CODE_HIGHLIGHT = True
 
-# 窗口布局
-LAYOUT = "LEFT-RIGHT"  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
-DARK_MODE = True  # "LEFT-RIGHT"（左右布局） # "TOP-DOWN"（上下布局）
+# window layout
+LAYOUT = "LEFT-RIGHT" # "LEFT-RIGHT" (left and right layout) # "TOP-DOWN" (top and bottom layout)
+DARK_MODE = True # "LEFT-RIGHT" (left and right layout) # "TOP-DOWN" (top and bottom layout)
 
-# 发送请求到OpenAI后，等待多久判定为超时
+# After sending a request to OpenAI, how long to wait for it to be judged as timeout
 TIMEOUT_SECONDS = 30
 
-# 网页的端口, -1代表随机端口
+# The port of the webpage, -1 represents a random port
 WEB_PORT = -1
 
-# 如果OpenAI不响应（网络卡顿、代理失败、KEY失效），重试的次数限制
+# If OpenAI does not respond (network freeze, proxy failure, KEY failure), the number of retries is limited
 MAX_RETRY = 2
 
-# 模型选择是 (注意: LLM_MODEL是默认选中的模型, 同时它必须被包含在AVAIL_LLM_MODELS切换列表中 )
-LLM_MODEL = "gpt-3.5-turbo" # 可选 ↓↓↓
-AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "newbing-free", "stack-claude"]
-# P.S. 其他可用的模型还包括 ["newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
+# Model selection is (Note: LLM_MODEL is the default selected model, and it must be included in the AVAIL_LLM_MODELS switch list )
+LLM_MODEL = "gpt-3.5-turbo" # optional ↓↓↓
+AVAIL_LLM_MODELS = ["gpt-3.5-turbo", "api2d-gpt-3.5-turbo", "gpt-4", "api2d-gpt-4", "chatglm", "moss", "newbing", "newbing- free", "stack-claude"]
+# P.S. Other available models include ["newbing-free", "jittorllms_rwkv", "jittorllms_pangualpha", "jittorllms_llama"]
 
-# 本地LLM模型如ChatGLM的执行方式 CPU/GPU
-LOCAL_MODEL_DEVICE = "cpu" # 可选 "cuda"
+# Execution of local LLM models such as ChatGLM CPU/GPU
+LOCAL_MODEL_DEVICE = "cpu" # optional "cuda"
 
-# 设置gradio的并行线程数（不需要修改）
+# Set the number of parallel threads of gradio (no need to modify)
 CONCURRENT_COUNT = 100
 
-# 加一个live2d装饰
+# Add a live2d decoration
 ADD_WAIFU = False
 
-# 设置用户名和密码（不需要修改）（相关功能不稳定，与gradio版本和网络都相关，如果本地使用不建议加这个）
+# Set the user name and password (no need to modify) (related functions are unstable, related to gradio version and network, if you use it locally, it is not recommended to add this)
 # [("username", "password"), ("username2", "password2"), ...]
 AUTHENTICATION = []
 
-# 重新URL重新定向，实现更换API_URL的作用（常规情况下，不要修改!!）
-# （高危设置！通过修改此设置，您将把您的API-KEY和对话隐私完全暴露给您设定的中间人！）
-# 格式 {"https://api.openai.com/v1/chat/completions": "在这里填写重定向的api.openai.com的URL"} 
-# 例如 API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://ai.open.com/api/conversation"}
+# Redirect the URL to achieve the function of replacing API_URL (under normal circumstances, do not modify it!!)
+# (High-risk setting! By modifying this setting, you will completely expose your API-KEY and conversation privacy to the middleman you set!)
+# Format {"https://api.openai.com/v1/chat/completions": "Fill in the redirected api.openai.com URL here"}
+# For example API_URL_REDIRECT = {"https://api.openai.com/v1/chat/completions": "https://ai.open.com/api/conversation"}
 API_URL_REDIRECT = {}
 
-# 如果需要在二级路径下运行（常规情况下，不要修改!!）（需要配合修改main.py才能生效!）
+# If you need to run under the secondary path (under normal circumstances, do not modify!!) (you need to cooperate with modifying main.py to take effect!)
 CUSTOM_PATH = "/"
 
-# 如果需要使用newbing，把newbing的长长的cookie放到这里
-NEWBING_STYLE = "creative"  # ["creative", "balanced", "precise"]
-# 从现在起，如果您调用"newbing-free"模型，则无需填写NEWBING_COOKIES
+# If you need to use newbing, put the long cookie of newbing here
+NEWBING_STYLE = "creative" # ["creative", "balanced", "precise"]
+# From now on, if you call the "newbing-free" model, you don't need to fill in NEWBING_COOKIES
 NEWBING_COOKIES = """
 your bing cookies here
 """
 
-# 如果需要使用Slack Claude，使用教程详情见 request_llm/README.md
-SLACK_CLAUDE_BOT_ID = ''   
+# If you need to use Slack Claude, see request_llm/README.md for the tutorial details
+SLACK_CLAUDE_BOT_ID = ''
 SLACK_CLAUDE_USER_TOKEN = ''
