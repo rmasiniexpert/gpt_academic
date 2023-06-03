@@ -86,86 +86,86 @@ async def run(context, max_token, temperature, top_p, addr, port):
 
 
 def predict(inputs, llm_kwargs, plugin_kwargs, chatbot, history=[], system_prompt='', stream = True, additional_fn=None):
-    """
-        发送至chatGPT，流式获取输出。
-        用于基础的对话功能。
-        inputs 是本次问询的输入
-        top_p, temperature是chatGPT的内部调优参数
-        history 是之前的对话列表（注意无论是inputs还是history，内容太长了都会触发token数量溢出的错误）
-        chatbot 为WebUI中显示的对话列表，修改它，然后yeild出去，可以直接修改对话界面内容
-        additional_fn代表点击的哪个按钮，按钮见functional.py
-    """
-    if additional_fn is not None:
-        import core_functional
-        importlib.reload(core_functional)    # 热更新prompt
-        core_functional = core_functional.get_core_functions()
-        if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs)  # 获取预处理函数（如果有的话）
-        inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
+     """
+         Send to chatGPT to stream the output.
+         Used for basic dialog functionality.
+         inputs is the input of this query
+         top_p, temperature are internal tuning parameters of chatGPT
+         history is a list of previous conversations (note that whether it is inputs or history, if the content is too long, it will trigger an error that the number of tokens overflows)
+         chatbot is the dialog list displayed in the WebUI, modify it, and then yeild out, you can directly modify the content of the dialog interface
+         additional_fn represents which button is clicked, see functional.py for the button
+     """
+     if additional_fn is not None:
+         import core_functional
+         importlib.reload(core_functional) # hot update prompt
+         core_functional = core_functional. get_core_functions()
+         if "PreProcess" in core_functional[additional_fn]: inputs = core_functional[additional_fn]["PreProcess"](inputs) # Get the preprocessing function (if any)
+         inputs = core_functional[additional_fn]["Prefix"] + inputs + core_functional[additional_fn]["Suffix"]
 
-    raw_input = "What I would like to say is the following: " + inputs
-    history.extend([inputs, ""])
-    chatbot.append([inputs, ""])
-    yield from update_ui(chatbot=chatbot, history=history, msg="等待响应") # 刷新界面
+     raw_input = "What I would like to say is the following: " + inputs
+     history. extend([inputs, ""])
+     chatbot.append([inputs, ""])
+     yield from update_ui(chatbot=chatbot, history=history, msg="wait for response") # Refresh the interface
 
-    prompt = raw_input
-    tgui_say = ""
+     prompt = raw_input
+     tgui_say = ""
 
-    model_name, addr_port = llm_kwargs['llm_model'].split('@')
-    assert ':' in addr_port, "LLM_MODEL 格式不正确！" + llm_kwargs['llm_model']
-    addr, port = addr_port.split(':')
+     model_name, addr_port = llm_kwargs['llm_model']. split('@')
+     assert ':' in addr_port, "LLM_MODEL is not well-formed!" + llm_kwargs['llm_model']
+     addr, port = addr_port. split(':')
 
 
-    mutable = ["", time.time()]
-    def run_coorotine(mutable):
-        async def get_result(mutable):
-            # "tgui:galactica-1.3b@localhost:7860"
+     mutable = ["", time. time()]
+     def run_coorotine(mutable):
+         async def get_result(mutable):
+             # "tgui:galactica-1.3b@localhost:7860"
 
-            async for response in run(context=prompt, max_token=llm_kwargs['max_length'], 
-                                      temperature=llm_kwargs['temperature'], 
-                                      top_p=llm_kwargs['top_p'], addr=addr, port=port):
-                print(response[len(mutable[0]):])
-                mutable[0] = response
-                if (time.time() - mutable[1]) > 3: 
-                    print('exit when no listener')
-                    break
-        asyncio.run(get_result(mutable))
+             async for response in run(context=prompt, max_token=llm_kwargs['max_length'],
+                                       temperature=llm_kwargs['temperature'],
+                                       top_p=llm_kwargs['top_p'], addr=addr, port=port):
+                 print(response[len(mutable[0]):])
+                 mutable[0] = response
+                 if (time.time() - mutable[1]) > 3:
+                     print('exit when no listener')
+                     break
+         asyncio. run(get_result(mutable))
 
-    thread_listen = threading.Thread(target=run_coorotine, args=(mutable,), daemon=True)
-    thread_listen.start()
+     thread_listen = threading.Thread(target=run_coorotine, args=(mutable,), daemon=True)
+     thread_listen. start()
 
-    while thread_listen.is_alive():
-        time.sleep(1)
-        mutable[1] = time.time()
-        # Print intermediate steps
-        if tgui_say != mutable[0]:
-            tgui_say = mutable[0]
-            history[-1] = tgui_say
-            chatbot[-1] = (history[-2], history[-1])
-            yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+     while thread_listen.is_alive():
+         time. sleep(1)
+         mutable[1] = time. time()
+         # Print intermediate steps
+         if tgui_say != mutable[0]:
+             tgui_say = mutable[0]
+             history[-1] = tgui_say
+             chatbot[-1] = (history[-2], history[-1])
+             yield from update_ui(chatbot=chatbot, history=history) # Refresh the interface
 
 
 
 
 def predict_no_ui_long_connection(inputs, llm_kwargs, history, sys_prompt, observe_window, console_slience=False):
-    raw_input = "What I would like to say is the following: " + inputs
-    prompt = raw_input
-    tgui_say = ""
-    model_name, addr_port = llm_kwargs['llm_model'].split('@')
-    assert ':' in addr_port, "LLM_MODEL 格式不正确！" + llm_kwargs['llm_model']
-    addr, port = addr_port.split(':')
+     raw_input = "What I would like to say is the following: " + inputs
+     prompt = raw_input
+     tgui_say = ""
+     model_name, addr_port = llm_kwargs['llm_model']. split('@')
+     assert ':' in addr_port, "LLM_MODEL is not well-formed!" + llm_kwargs['llm_model']
+     addr, port = addr_port. split(':')
 
 
-    def run_coorotine(observe_window):
-        async def get_result(observe_window):
-            async for response in run(context=prompt, max_token=llm_kwargs['max_length'], 
-                                      temperature=llm_kwargs['temperature'], 
-                                      top_p=llm_kwargs['top_p'], addr=addr, port=port):
-                print(response[len(observe_window[0]):])
-                observe_window[0] = response
-                if (time.time() - observe_window[1]) > 5: 
-                    print('exit when no listener')
-                    break
-        asyncio.run(get_result(observe_window))
-    thread_listen = threading.Thread(target=run_coorotine, args=(observe_window,))
-    thread_listen.start()
-    return observe_window[0]
+     def run_coorotine(observe_window):
+         async def get_result(observe_window):
+             async for response in run(context=prompt, max_token=llm_kwargs['max_length'],
+                                       temperature=llm_kwargs['temperature'],
+                                       top_p=llm_kwargs['top_p'], addr=addr, port=port):
+                 print(response[len(observe_window[0]):])
+                 observe_window[0] = response
+                 if (time.time() - observe_window[1]) > 5:
+                     print('exit when no listener')
+                     break
+         asyncio. run(get_result(observe_window))
+     thread_listen = threading.Thread(target=run_coorotine, args=(observe_window,))
+     thread_listen. start()
+     return observe_window[0]
