@@ -1,159 +1,159 @@
 
 def check_proxy(proxies):
-    import requests
-    proxies_https = proxies['https'] if proxies is not None else '无'
-    try:
-        response = requests.get("https://ipapi.co/json/",
-                                proxies=proxies, timeout=4)
-        data = response.json()
-        print(f'查询代理的地理位置，返回的结果是{data}')
-        if 'country_name' in data:
-            country = data['country_name']
-            result = f"代理配置 {proxies_https}, 代理所在地：{country}"
-        elif 'error' in data:
-            result = f"代理配置 {proxies_https}, 代理所在地：未知，IP查询频率受限"
-        print(result)
-        return result
-    except:
-        result = f"代理配置 {proxies_https}, 代理所在地查询超时，代理可能无效"
-        print(result)
-        return result
+     import requests
+     proxies_https = proxies['https'] if proxies is not None else 'None'
+     try:
+         response = requests. get("https://ipapi.co/json/",
+                                 proxies=proxies, timeout=4)
+         data = response.json()
+         print(f'Query the geographic location of the agent, the returned result is {data}')
+         if 'country_name' in data:
+             country = data['country_name']
+             result = f"Proxy configuration {proxies_https}, proxy location: {country}"
+         elif 'error' in data:
+             result = f"Proxy configuration {proxies_https}, proxy location: unknown, IP query frequency is limited"
+         print(result)
+         return result
+     except:
+         result = f"Proxy configuration {proxies_https}, proxy location query timed out, proxy may be invalid"
+         print(result)
+         return result
 
 
 def backup_and_download(current_version, remote_version):
-    """
-    一键更新协议：备份和下载
-    """
-    from toolbox import get_conf
-    import shutil
-    import os
-    import requests
-    import zipfile
-    os.makedirs(f'./history', exist_ok=True)
-    backup_dir = f'./history/backup-{current_version}/'
-    new_version_dir = f'./history/new-version-{remote_version}/'
-    if os.path.exists(new_version_dir):
-        return new_version_dir
-    os.makedirs(new_version_dir)
-    shutil.copytree('./', backup_dir, ignore=lambda x, y: ['history'])
-    proxies, = get_conf('proxies')
-    r = requests.get(
-        'https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
-    zip_file_path = backup_dir+'/master.zip'
-    with open(zip_file_path, 'wb+') as f:
-        f.write(r.content)
-    dst_path = new_version_dir
-    with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
-        for zip_info in zip_ref.infolist():
-            dst_file_path = os.path.join(dst_path, zip_info.filename)
-            if os.path.exists(dst_file_path):
-                os.remove(dst_file_path)
-            zip_ref.extract(zip_info, dst_path)
-    return new_version_dir
+     """
+     One-click update protocol: backup and download
+     """
+     from toolbox import get_conf
+     import shut-off
+     import os
+     import requests
+     import zipfile
+     os.makedirs(f'./history', exist_ok=True)
+     backup_dir = f'./history/backup-{current_version}/'
+     new_version_dir = f'./history/new-version-{remote_version}/'
+     if os.path.exists(new_version_dir):
+         return new_version_dir
+     os.makedirs(new_version_dir)
+     shutil. copytree('./', backup_dir, ignore=lambda x, y: ['history'])
+     proxies, = get_conf('proxies')
+     r = requests. get(
+         'https://github.com/binary-husky/chatgpt_academic/archive/refs/heads/master.zip', proxies=proxies, stream=True)
+     zip_file_path = backup_dir+'/master.zip'
+     with open(zip_file_path, 'wb+') as f:
+         f. write(r. content)
+     dst_path = new_version_dir
+     with zipfile.ZipFile(zip_file_path, "r") as zip_ref:
+         for zip_info in zip_ref.infolist():
+             dst_file_path = os.path.join(dst_path, zip_info.filename)
+             if os.path.exists(dst_file_path):
+                 os. remove(dst_file_path)
+             zip_ref. extract(zip_info, dst_path)
+     return new_version_dir
 
 
 def patch_and_restart(path):
-    """
-    一键更新协议：覆盖和重启
-    """
-    from distutils import dir_util
-    import shutil
-    import os
-    import sys
-    import time
-    import glob
-    from colorful import print亮黄, print亮绿, print亮红
-    # if not using config_private, move origin config.py as config_private.py
-    if not os.path.exists('config_private.py'):
-        print亮黄('由于您没有设置config_private.py私密配置，现将您的现有配置移动至config_private.py以防止配置丢失，',
-              '另外您可以随时在history子文件夹下找回旧版的程序。')
-        shutil.copyfile('config.py', 'config_private.py')
-    path_new_version = glob.glob(path + '/*-master')[0]
-    dir_util.copy_tree(path_new_version, './')
-    print亮绿('代码已经更新，即将更新pip包依赖……')
-    for i in reversed(range(5)): time.sleep(1); print(i)
-    try: 
-        import subprocess
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
-    except:
-        print亮红('pip包依赖安装出现问题，需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
-    print亮绿('更新完成，您可以随时在history子文件夹下找回旧版的程序，5s之后重启')
-    print亮红('假如重启失败，您可能需要手动安装新增的依赖库 `python -m pip install -r requirements.txt`，然后在用常规的`python main.py`的方式启动。')
-    print(' ------------------------------ -----------------------------------')
-    for i in reversed(range(8)): time.sleep(1); print(i)
-    os.execl(sys.executable, sys.executable, *sys.argv)
+     """
+     One-click update protocol: overwrite and reboot
+     """
+     from distutils import dir_util
+     import shut-off
+     import os
+     import sys
+     import time
+     import glob
+     from colorful import print bright yellow, print bright green, print bright red
+     # if not using config_private, move origin config.py as config_private.py
+     if not os.path.exists('config_private.py'):
+         print bright yellow('Because you have not set config_private.py private configuration, now move your existing configuration to config_private.py to prevent configuration loss,',
+               'In addition, you can retrieve the old version of the program in the history subfolder at any time. ')
+         shutil. copyfile('config.py', 'config_private.py')
+     path_new_version = glob.glob(path + '/*-master')[0]
+     dir_util.copy_tree(path_new_version, './')
+     print bright green ('The code has been updated, and the pip package dependency will be updated soon...')
+     for i in reversed(range(5)): time. sleep(1); print(i)
+     try:
+         import subprocess
+         subprocess.check_call([sys.executable, '-m', 'pip', 'install', '-r', 'requirements.txt'])
+     except:
+         print bright red ('There is a problem with the pip package dependency installation, you need to manually install the new dependency library `python -m pip install -r requirements.txt`, and then use the regular `python main.py` to start.')
+     print bright green ('The update is complete, you can retrieve the old version of the program in the history subfolder at any time, restart after 5s')
+     print bright red ('If the restart fails, you may need to manually install the newly added dependency library `python -m pip install -r requirements.txt`, and then use the regular `python main.py` to start.')
+     print('------------------------------------------------ ------------------')
+     for i in reversed(range(8)): time. sleep(1); print(i)
+     os.execl(sys.executable, sys.executable, *sys.argv)
 
 
 def get_current_version():
-    import json
-    try:
-        with open('./version', 'r', encoding='utf8') as f:
-            current_version = json.loads(f.read())['version']
-    except:
-        current_version = ""
-    return current_version
+     import json
+     try:
+         with open('./version', 'r', encoding='utf8') as f:
+             current_version = json. loads(f. read())['version']
+     except:
+         current_version = ""
+     return current_version
 
 
 def auto_update(raise_error=False):
-    """
-    一键更新协议：查询版本和用户意见
-    """
-    try:
-        from toolbox import get_conf
-        import requests
-        import time
-        import json
-        proxies, = get_conf('proxies')
-        response = requests.get(
-            "https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=5)
-        remote_json_data = json.loads(response.text)
-        remote_version = remote_json_data['version']
-        if remote_json_data["show_feature"]:
-            new_feature = "新功能：" + remote_json_data["new_feature"]
-        else:
-            new_feature = ""
-        with open('./version', 'r', encoding='utf8') as f:
-            current_version = f.read()
-            current_version = json.loads(current_version)['version']
-        if (remote_version - current_version) >= 0.01:
-            from colorful import print亮黄
-            print亮黄(
-                f'\n新版本可用。新版本:{remote_version}，当前版本:{current_version}。{new_feature}')
-            print('（1）Github更新地址:\nhttps://github.com/binary-husky/chatgpt_academic\n')
-            user_instruction = input('（2）是否一键更新代码（Y+回车=确认，输入其他/无输入+回车=不更新）？')
-            if user_instruction in ['Y', 'y']:
-                path = backup_and_download(current_version, remote_version)
-                try:
-                    patch_and_restart(path)
-                except:
-                    msg = '更新失败。'
-                    if raise_error:
-                        from toolbox import trimmed_format_exc
-                        msg += trimmed_format_exc()
-                    print(msg)
-            else:
-                print('自动更新程序：已禁用')
-                return
-        else:
-            return
-    except:
-        msg = '自动更新程序：已禁用'
-        if raise_error:
-            from toolbox import trimmed_format_exc
-            msg += trimmed_format_exc()
-        print(msg)
+     """
+     One-click update agreement: query version and user opinions
+     """
+     try:
+         from toolbox import get_conf
+         import requests
+         import time
+         import json
+         proxies, = get_conf('proxies')
+         response = requests. get(
+             "https://raw.githubusercontent.com/binary-husky/chatgpt_academic/master/version", proxies=proxies, timeout=5)
+         remote_json_data = json. loads(response. text)
+         remote_version = remote_json_data['version']
+         if remote_json_data["show_feature"]:
+             new_feature = "New feature:" + remote_json_data["new_feature"]
+         else:
+             new_feature = ""
+         with open('./version', 'r', encoding='utf8') as f:
+             current_version = f. read()
+             current_version = json. loads(current_version)['version']
+         if (remote_version - current_version) >= 0.01:
+             from colorful import print bright yellow
+             print bright yellow (
+                 f'\nA new version is available. New version: {remote_version}, current version: {current_version}. {new_feature}')
+             print('(1) Github update address:\nhttps://github.com/binary-husky/chatgpt_academic\n')
+             user_instruction = input('(2) Is it possible to update the code with one click (Y+Enter=confirm, input other/no input+Enter=no update)?')
+             if user_instruction in ['Y', 'y']:
+                 path = backup_and_download(current_version, remote_version)
+                 try:
+                     patch_and_restart(path)
+                 except:
+                     msg = 'Update failed. '
+                     if raise_error:
+                         from toolbox import trimmed_format_exc
+                         msg += trimmed_format_exc()
+                     print(msg)
+             else:
+                 print('Automatic Updater: Disabled')
+                 return
+         else:
+             return
+     except:
+         msg = 'Auto Updater: Disabled'
+         if raise_error:
+             from toolbox import trimmed_format_exc
+             msg += trimmed_format_exc()
+         print(msg)
 
 def warm_up_modules():
-    print('正在执行一些模块的预热...')
-    from request_llm.bridge_all import model_info
-    enc = model_info["gpt-3.5-turbo"]['tokenizer']
-    enc.encode("模块预热", disallowed_special=())
-    enc = model_info["gpt-4"]['tokenizer']
-    enc.encode("模块预热", disallowed_special=())
+     print('Warming up some modules...')
+     from request_llm.bridge_all import model_info
+     enc = model_info["gpt-3.5-turbo"]['tokenizer']
+     enc.encode("Module preheating", disallowed_special=())
+     enc = model_info["gpt-4"]['tokenizer']
+     enc.encode("Module preheating", disallowed_special=())
 
 if __name__ == '__main__':
-    import os
-    os.environ['no_proxy'] = '*'  # 避免代理网络产生意外污染
-    from toolbox import get_conf
-    proxies, = get_conf('proxies')
-    check_proxy(proxies)
+     import os
+     os.environ['no_proxy'] = '*' # avoid accidental pollution of proxy network
+     from toolbox import get_conf
+     proxies, = get_conf('proxies')
+     check_proxy(proxies)
