@@ -20,7 +20,7 @@ class PaperFileGroup():
 
     def run_file_split(self, max_token_limit=1900):
         """
-        将长文本分离开来
+        Split long texts
         """
         for index, file_content in enumerate(self.file_contents):
             if self.get_token_num(file_content) < max_token_limit:
@@ -81,7 +81,7 @@ def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
         pfg.file_paths.append(fp)
         pfg.file_contents.append(file_content)
 
-    #  <-------- 拆分过长的IPynb文件 ---------->
+    #  <-------- Split long IPynb files ---------->
     pfg.run_file_split(max_token_limit=1024)
     n_split = len(pfg.sp_file_contents)
 
@@ -89,7 +89,7 @@ def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
                     r"If a block starts with `Markdown` which means it's a markdown block in ipynbipynb. " +
                     r"Start a new line for a block and block num use Chinese." +
                     f"\n\n{frag}" for frag in pfg.sp_file_contents]
-    inputs_show_user_array = [f"{f}的分析如下" for f in pfg.sp_file_tag]
+    inputs_show_user_array = [f"Analysis of {f}" for f in pfg.sp_file_tag]
     sys_prompt_array = ["You are a professional programmer."] * n_split
 
     gpt_response_collection = yield from request_gpt_model_multi_threads_with_very_awesome_ui_and_high_efficiency(
@@ -99,39 +99,39 @@ def ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbo
         chatbot=chatbot,
         history_array=[[""] for _ in range(n_split)],
         sys_prompt_array=sys_prompt_array,
-        # max_workers=5,  # OpenAI所允许的最大并行过载
+        # max_workers=5,  # Maximum parallel overload allowed by OpenAI
         scroller_max_len=80
     )
 
-    #  <-------- 整理结果，退出 ---------->
+    #  <-------- Organize the results and exit ---------->
     block_result = "  \n".join(gpt_response_collection)
-    chatbot.append(("解析的结果如下", block_result))
-    history.extend(["解析的结果如下", block_result])
-    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+    chatbot.append(("The analysis results are as follows", block_result))
+    history.extend(["The analysis results are as follows", block_result])
+    yield from update_ui(chatbot=chatbot, history=history)  # Refresh the interface
 
-    #  <-------- 写入文件，退出 ---------->
+    #  <-------- Write to file and exit ---------->
     res = write_results_to_file(history)
-    chatbot.append(("完成了吗？", res))
-    yield from update_ui(chatbot=chatbot, history=history) # 刷新界面
+    chatbot.append(("Is it completed?", res))
+    yield from update_ui(chatbot=chatbot, history=history)  # Refresh the interface
 
 @CatchException
 def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, web_port):
     chatbot.append([
-        "函数插件功能？",
-        "对IPynb文件进行解析。Contributor: codycjy."])
-    yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+        "Function plugin feature?",
+        "Parse IPynb files. Contributor: codycjy."])
+    yield from update_ui(chatbot=chatbot, history=history)  # Refresh the interface
 
-    history = []    # 清空历史
+    history = []    # Clear the history
     import glob
     import os
     if os.path.exists(txt):
         project_folder = txt
     else:
         if txt == "":
-            txt = '空空如也的输入栏'
+            txt = 'Empty input field'
         report_execption(chatbot, history,
-                         a=f"解析项目: {txt}", b=f"找不到本地项目或无权访问: {txt}")
-        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+                         a=f"Parsing project: {txt}", b=f"Cannot find local project or access denied: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history)  # Refresh the interface
         return
     if txt.endswith('.ipynb'):
         file_manifest = [txt]
@@ -140,7 +140,7 @@ def 解析ipynb文件(txt, llm_kwargs, plugin_kwargs, chatbot, history, system_p
             f'{project_folder}/**/*.ipynb', recursive=True)]
     if len(file_manifest) == 0:
         report_execption(chatbot, history,
-                         a=f"解析项目: {txt}", b=f"找不到任何.ipynb文件: {txt}")
-        yield from update_ui(chatbot=chatbot, history=history)  # 刷新界面
+                         a=f"Parsing project: {txt}", b=f"No .ipynb files found: {txt}")
+        yield from update_ui(chatbot=chatbot, history=history)  # Refresh the interface
         return
     yield from ipynb解释(file_manifest, project_folder, llm_kwargs, plugin_kwargs, chatbot, history, system_prompt, )
